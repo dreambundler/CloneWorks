@@ -13,3 +13,12 @@ node_modules/
 # Logs
 logs/
 *.log
+
+# local-only folders (keep locally, never commit)
+archive/
+marketing/
+data/
+
+# local-only folders
+archive/
+marketing/
