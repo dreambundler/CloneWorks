@@ -1,0 +1,46 @@
+FROM nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR /opt
+
+# System deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git python3 python3-venv python3-pip \
+    libgl1 libglib2.0-0 \
+    curl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+# Python venv (keeps things tidy)
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Install JupyterLab
+RUN pip install --no-cache-dir --upgrade pip \
+ && pip install --no-cache-dir jupyterlab==4.2.5
+
+# Install ComfyUI
+RUN git clone https://github.com/comfyanonymous/ComfyUI.git /opt/comfyui
+WORKDIR /opt/comfyui
+
+# Install ComfyUI requirements
+RUN pip install --no-cache-dir -r requirements.txt
+
+# (Optional but common) install torch matching CUDA on RunPod
+# If your base image already has torch, you can skip this.
+# RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# Bake in custom nodes (build-time)
+# Keep these COPY lines AFTER comfyui requirements so cache behaves nicely.
+COPY docker/nodes.txt /docker/nodes.txt
+COPY docker/install_nodes.sh /docker/install_nodes.sh
+
+RUN chmod +x /docker/install_nodes.sh \
+ && bash /docker/install_nodes.sh /docker/nodes.txt /opt/comfyui/custom_nodes
+
+# Copy start script
+COPY docker/start-comfy.sh /start.sh
+RUN chmod +x /start.sh
+
+EXPOSE 8188 8888
+CMD ["/start.sh"]
+

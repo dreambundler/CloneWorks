@@ -1,0 +1,104 @@
+# CloneWorks
+
+CloneWorks is a modular AI workspace for training, inference, and experimentation with
+generative models (LoRA training, ComfyUI workflows, and related tooling).
+
+This repository is structured to support **reproducible RunPod environments**, clean
+separation of **software vs persistent data**, and gradual expansion over time.
+
+> This is an evolving system. Structure and conventions may change as CloneWorks grows.
+
+---
+
+## Philosophy
+
+- **/opt** → installed software (immutable, baked into images)
+- **/workspace** → data, models, outputs (persistent via volumes)
+- Separate stacks for **training** and **inference**
+- Debug and validate in the **real target environment** (RunPod)
+- Promote only tested images to `:latest`
+
+Each folder under `Runpod/` represents an **independent stack** with:
+- its own Dockerfile
+- its own startup logic
+- its own RunPod template
+
+---
+
+## Stacks
+
+### WAN22 LoRA Training (`wan22-lora-training`)
+
+- Purpose: LoRA training using AI Toolkit
+- Runs:
+  - AI Toolkit backend (8675) (training jobs)
+  - JupyterLab (8888) for dataset, config, and output management
+- Uses `/workspace` for:
+  - datasets
+  - outputs
+  - trained LoRAs
+  - logs
+
+Docker image: cloneworks/wan22-stack
+
+---
+
+### ComfyUI Workflows (`comfyui-workflows`)
+
+- Purpose: inference, experimentation, workflows
+- Runs:
+  - ComfyUI (8188)
+  - JupyterLab (8888) for model/node management
+- Persistent directories:
+  - `/workspace/comfyui/models`
+  - `/workspace/comfyui/input`
+  - `/workspace/comfyui/output`
+
+Docker Image: cloneworks/comfyui-cloneworks
+
+---
+
+## Docker Image Tagging Strategy
+
+- `fixed-X`, `dev-X` → test candidates
+- `latest` → confirmed working baseline
+- Versioned tags (e.g. `v1.0.0`) will be added **once stacks are fully stable**
+
+Promotion flow:
+1. Build & push `fixed-X`
+2. Test in RunPod
+3. Retag to `latest` once confirmed
+
+---
+
+## RunPod Conventions
+
+- Volume mounted at: `/workspace`
+- No large models baked into images
+- Ports commonly used:
+  - JupyterLab: `8888`
+  - ComfyUI: `8188`
+
+Jupyter is configured to work correctly behind the RunPod proxy
+(no token login, uploads enabled).
+
+---
+
+## Status
+
+This project is **actively evolving**.
+Structure, tooling, and conventions may change as CloneWorks expands.
+
+The goal is long-term clarity and reproducibility, not premature polish.
+
+---
+
+## Notes
+
+- Large assets (models, datasets) should **never** be duplicated unnecessarily.
+- Prefer symlinks or shared volumes over copies.
+- Keep stacks independent unless there is a clear reason to merge concerns.
+
+
+
+
