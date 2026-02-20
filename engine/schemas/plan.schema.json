@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cloneworks.plan.schema.json",
+  "title": "CloneWorks Execution Plan",
+  "type": "object",
+  "required": ["planId", "adapter", "steps"],
+  "properties": {
+    "planId": { "type": "string" },
+    "adapter": { "type": "string", "enum": ["comfyui"] },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "params"],
+        "properties": {
+          "name": { "type": "string" },
+          "params": { "type": "object", "additionalProperties": true }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

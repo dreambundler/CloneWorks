@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cloneworks.request.schema.json",
+  "title": "CloneWorks Request",
+  "type": "object",
+  "required": ["requestId", "mode", "identity"],
+  "properties": {
+    "requestId": { "type": "string" },
+    "mode": { "type": "string", "enum": ["image", "train_lora"] },
+    "identity": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string" },
+        "lora": { "type": "string" },
+        "strength": { "type": "number", "minimum": 0, "maximum": 2 }
+      },
+      "additionalProperties": true
+    },
+    "style": { "type": "object", "additionalProperties": true },
+    "pose": { "type": "object", "additionalProperties": true },
+    "garments": { "type": "array", "items": { "type": "object" } },
+    "output": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": true
+}
