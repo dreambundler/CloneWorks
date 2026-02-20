@@ -1,1 +1,15 @@
-archive/
+# Environment
+.env
+*.env
+
+# Local assets
+data/
+marketing/
+*.png
+
+# Node
+node_modules/
+
+# Logs
+logs/
+*.log
